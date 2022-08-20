@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://btj4n7pbnuaai"]
+
+[ext_resource type="Script" path="res://Src/UI/MessageTab.cs" id="1_l0jd2"]
+
+[node name="Message" type="VBoxContainer" node_paths=PackedStringArray("messageInput")]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 37.0
+offset_right = -5.0
+offset_bottom = -5.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_l0jd2")
+messageInput = NodePath("Message")
+
+[node name="Message" type="TextEdit" parent="."]
+offset_right = 230.0
+offset_bottom = 35.0
+scroll_fit_content_height = true
+
+[node name="Button" type="Button" parent="."]
+offset_left = 183.0
+offset_top = 39.0
+offset_right = 230.0
+offset_bottom = 70.0
+size_flags_horizontal = 8
+text = "Send"
+
+[connection signal="gui_input" from="Message" to="." method="OnMessageInputGUIInput"]
+[connection signal="pressed" from="Button" to="." method="OnSendButtonPressed"]

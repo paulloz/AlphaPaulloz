@@ -1,0 +1,56 @@
+[gd_scene load_steps=6 format=3 uid="uid://c8hqxupeff6nw"]
+
+[ext_resource type="Theme" uid="uid://coxly2xvflryq" path="res://DefaultTheme.tres" id="1_dw4tp"]
+[ext_resource type="Script" path="res://Src/Twitch/TwitchBot.cs" id="1_udkpk"]
+[ext_resource type="Script" path="res://Src/UI/StatusBar.cs" id="2_4tdoi"]
+[ext_resource type="PackedScene" uid="uid://dwueeg252giy5" path="res://Src/UI/ConfigurationTab.tscn" id="3_mqk8k"]
+[ext_resource type="PackedScene" uid="uid://btj4n7pbnuaai" path="res://Src/UI/MessageTab.tscn" id="4_n1o16"]
+
+[node name="Main" type="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("1_dw4tp")
+
+[node name="TwitchBot" type="Node" parent="."]
+script = ExtResource("1_udkpk")
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 236.0
+offset_bottom = 556.0
+
+[node name="TabContainer" type="TabContainer" parent="Margin/Content"]
+offset_right = 232.0
+offset_bottom = 524.0
+size_flags_vertical = 3
+
+[node name="Configuration" parent="Margin/Content/TabContainer" instance=ExtResource("3_mqk8k")]
+
+[node name="Message" parent="Margin/Content/TabContainer" instance=ExtResource("4_n1o16")]
+visible = false
+
+[node name="StatusBar" type="Panel" parent="Margin/Content" node_paths=PackedStringArray("statusLabel")]
+custom_minimum_size = Vector2(0, 24)
+offset_top = 528.0
+offset_right = 232.0
+offset_bottom = 552.0
+script = ExtResource("2_4tdoi")
+statusLabel = NodePath("StatusLabel")
+
+[node name="StatusLabel" type="Label" parent="Margin/Content/StatusBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "..."
+clip_text = true
+metadata/_edit_layout_mode = 1
