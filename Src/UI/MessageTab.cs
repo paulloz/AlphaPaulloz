@@ -15,7 +15,7 @@ public partial class MessageTab : VBoxContainer
 
         if (string.IsNullOrWhiteSpace(message)) return;
 
-        Locator.TwitchService.SendMessage(message);
+        Locator.Twitch.SendMessage(message);
     }
 
     private void OnMessageInputGUIInput(InputEvent input)

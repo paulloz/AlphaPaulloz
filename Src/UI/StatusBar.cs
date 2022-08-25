@@ -16,10 +16,10 @@ public partial class StatusBar : Panel
         statusLabel!.AddThemeColorOverride("font_color", color);
     }
 
-    private (string, Color) EvaluateStatus() => Locator.TwitchService.Connected switch
+    private (string, Color) EvaluateStatus() => Locator.Twitch.Connected switch
     {
         true => ("Connected", GetThemeColor("success_color", "Editor")),
-        false when Locator.TwitchService.Connecting => ("Connecting", GetThemeColor("warning_color", "Editor")),
+        false when Locator.Twitch.Connecting => ("Connecting", GetThemeColor("warning_color", "Editor")),
         false => ("Not connected", GetThemeColor("error_color", "Editor")),
     };
 }

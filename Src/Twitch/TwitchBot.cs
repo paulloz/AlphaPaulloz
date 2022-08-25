@@ -107,7 +107,7 @@ public partial class TwitchBot : Node, ITwitchService
 
     private void OnClientError(object? sender, OnErrorEventArgs args)
     {
-        GD.PrintErr($"{args.Exception}");
+        Locator.Logger.LogErr(args.Exception.Message);
     }
 
     private void OnClientConnected(object? sender, OnConnectedArgs args)

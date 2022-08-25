@@ -16,12 +16,12 @@ public partial class ConfigurationTab : VBoxContainer
 
     public override void _Ready()
     {
-        channelNameInput!.Text = Locator.TwitchService.ChannelName;
+        channelNameInput!.Text = Locator.Twitch.ChannelName;
     }
 
     public override void _Process(float _)
     {
-        var twitch = Locator.TwitchService;
+        var twitch = Locator.Twitch;
 
         channelNameInput!.Editable = !twitch.Connecting && !twitch.Connected;
         connectButton!.Visible = !twitch.Connected;
@@ -31,22 +31,22 @@ public partial class ConfigurationTab : VBoxContainer
 
     private void OnChannelNameInputChanged(string text)
     {
-        Locator.TwitchService.ConfigureChannelName(text);
+        Locator.Twitch.ConfigureChannelName(text);
     }
 
     private void OnConnectButtonPressed()
     {
-        Locator.TwitchService.Connect();
+        Locator.Twitch.Connect();
     }
 
     private void OnDisconnectButtonPressed()
     {
-        Locator.TwitchService.Disconnect();
+        Locator.Twitch.Disconnect();
     }
 
     private void OnQuitButtonPressed()
     {
-        Locator.TwitchService.Disconnect();
+        Locator.Twitch.Disconnect();
         GetTree().Quit();
     }
 }
