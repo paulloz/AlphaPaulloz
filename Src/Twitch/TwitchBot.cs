@@ -4,6 +4,7 @@ using Godot;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TwitchLib.Api;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -13,10 +14,12 @@ namespace AlphaPaulloz;
 
 public partial class TwitchBot : Node, ITwitchService
 {
-    private const float CONNECTION_TIMEOUT = 8.0f;
+    private const string CONFIGURATION_FILE_PATH = "user://config.json";
+    private const float CONNECTION_TIMEOUT = 10.0f;
 
-    private readonly Config config;
+    private Config config;
 
+    private readonly TwitchAPI api = new();
     private TwitchClient client = new();
     private float connectionTimeout = 0.0f;
     private string channelName;
@@ -27,8 +30,10 @@ public partial class TwitchBot : Node, ITwitchService
 
     public TwitchBot()
     {
-        config = Config.ReadFromFile("user://config.json");
+        config = Config.ReadFromFile(CONFIGURATION_FILE_PATH);
         channelName = config.DefaultChannel;
+        api.Settings.ClientId = config.ClientID;
+        api.Settings.Secret = config.ClientSecret;
     }
 
     public override void _EnterTree()
@@ -59,7 +64,7 @@ public partial class TwitchBot : Node, ITwitchService
         if (Connected || Connecting) return;
 
         connectionTimeout = CONNECTION_TIMEOUT;
-        Task.Run(() => client.Connect());
+        Task.Run(() => ValidateRefreshAndConnect());
     }
 
     public void Disconnect()
@@ -84,6 +89,52 @@ public partial class TwitchBot : Node, ITwitchService
         client.SendMessage(client.GetJoinedChannel(channelName), message);
     }
 
+    private async void ValidateRefreshAndConnect()
+    {
+        if (await ValidateAccessToken())
+            client.Connect();
+        else
+        {
+            try
+            {
+                await RefreshAccessToken();
+                config.SaveToFile(CONFIGURATION_FILE_PATH);
+            }
+            catch (Exception exception)
+            {
+                OnClientError(client, new OnErrorEventArgs { Exception = exception });
+                Disconnect();
+                return;
+            }
+
+            if (await ValidateAccessToken())
+                client.Connect();
+            else
+                Disconnect();
+        }
+    }
+
+    private async Task<bool> ValidateAccessToken()
+    {
+        return (await api.Auth.ValidateAccessTokenAsync(config.AccessToken))?.ExpiresIn > 0;
+    }
+
+    private async Task RefreshAccessToken()
+    {
+        var refresh = await api.Auth.RefreshAuthTokenAsync(config.RefreshToken, config.ClientSecret, config.ClientID);
+        if (refresh == null)
+            throw new Exception("Could not refresh token.");
+
+        config = config with
+        {
+            AccessToken = refresh.AccessToken,
+            RefreshToken = refresh.RefreshToken,
+        };
+
+        TeardownClient();
+        SetupClient();
+    }
+
     private void SetupClient()
     {
         client = new();
@@ -91,6 +142,8 @@ public partial class TwitchBot : Node, ITwitchService
 
         client.OnError += OnClientError;
         client.OnConnected += OnClientConnected;
+        client.OnConnectionError += OnClientConnectionError;
+        client.OnIncorrectLogin += OnClientIncorrectLogin;
         client.OnJoinedChannel += OnClientJoinedChannel;
         client.OnChatCommandReceived += OnClientChatCommandReceived;
     }
@@ -101,6 +154,8 @@ public partial class TwitchBot : Node, ITwitchService
 
         client.OnError -= OnClientError;
         client.OnConnected -= OnClientConnected;
+        client.OnConnectionError -= OnClientConnectionError;
+        client.OnIncorrectLogin -= OnClientIncorrectLogin;
         client.OnJoinedChannel -= OnClientJoinedChannel;
         client.OnChatCommandReceived -= OnClientChatCommandReceived;
     }
@@ -108,6 +163,18 @@ public partial class TwitchBot : Node, ITwitchService
     private void OnClientError(object? sender, OnErrorEventArgs args)
     {
         Locator.Logger.LogErr(args.Exception.Message);
+    }
+
+    private void OnClientConnectionError(object? sender, OnConnectionErrorArgs args)
+    {
+        Locator.Logger.LogErr(args.Error.Message);
+        Disconnect();
+    }
+
+    private void OnClientIncorrectLogin(object? sender, OnIncorrectLoginArgs args)
+    {
+        Locator.Logger.LogErr(args.Exception.Message);
+        Disconnect();
     }
 
     private void OnClientConnected(object? sender, OnConnectedArgs args)
@@ -129,9 +196,24 @@ public partial class TwitchBot : Node, ITwitchService
 
     private struct Config
     {
-        public string DefaultChannel { get; init; }
+        public string ClientID { get; init; }
+        public string ClientSecret { get; init; }
+
         public string Username { get; init; }
+        public string DefaultChannel { get; init; }
+
         public string AccessToken { get; init; }
+        public string RefreshToken { get; init; }
+
+        public void SaveToFile(string path)
+        {
+            File configFile = new();
+            if (configFile.Open(path, File.ModeFlags.Write) is Error err && err != Error.Ok)
+                throw new Exception(Enum.GetName(typeof(Error), err));
+            configFile.StoreString(JsonSerializer.Serialize(this, typeof(Config),
+                                                            new JsonSerializerOptions { WriteIndented = true }));
+            configFile.Close();
+        }
 
         public static Config ReadFromFile(string path)
         {
