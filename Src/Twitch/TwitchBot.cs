@@ -74,6 +74,8 @@ public partial class TwitchBot : Node, ITwitchService
         connectionTimeout = 0.0f;
         client.Disconnect();
 
+        Locator.Logger.Log("Disconnected.");
+
         SetupClient();
     }
 
@@ -180,6 +182,8 @@ public partial class TwitchBot : Node, ITwitchService
     private void OnClientConnected(object? sender, OnConnectedArgs args)
     {
         client.JoinChannel(channelName);
+
+        Locator.Logger.Log($"Connected as: {config.Username}.");
     }
 
     private void OnClientJoinedChannel(object? sender, OnJoinedChannelArgs args)
@@ -188,6 +192,8 @@ public partial class TwitchBot : Node, ITwitchService
 
         if (args.Channel != channelName || client.JoinedChannels.Count > 1)
             Disconnect();
+
+        Locator.Logger.Log($"Joined channel: {channelName}.");
     }
 
     private void OnClientChatCommandReceived(object? sender, OnChatCommandReceivedArgs args)

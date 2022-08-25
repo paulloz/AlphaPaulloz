@@ -7,16 +7,22 @@
 [ext_resource type="PackedScene" uid="uid://btj4n7pbnuaai" path="res://Src/UI/MessageTab.tscn" id="4_n1o16"]
 
 [node name="Main" type="Panel"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme = ExtResource("1_dw4tp")
 
 [node name="TwitchBot" type="Node" parent="."]
 script = ExtResource("1_udkpk")
 
 [node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
@@ -25,28 +31,38 @@ theme_override_constants/margin_bottom = 4
 [node name="Content" type="VBoxContainer" parent="Margin"]
 offset_left = 4.0
 offset_top = 4.0
-offset_right = 236.0
-offset_bottom = 556.0
+offset_right = 476.0
+offset_bottom = 356.0
 
 [node name="TabContainer" type="TabContainer" parent="Margin/Content"]
-offset_right = 232.0
-offset_bottom = 524.0
+offset_right = 472.0
+offset_bottom = 324.0
 size_flags_vertical = 3
 
 [node name="Configuration" parent="Margin/Content/TabContainer" instance=ExtResource("3_mqk8k")]
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Message" parent="Margin/Content/TabContainer" instance=ExtResource("4_n1o16")]
 visible = false
+anchors_preset = 15
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="StatusBar" type="Panel" parent="Margin/Content" node_paths=PackedStringArray("statusLabel")]
 custom_minimum_size = Vector2(0, 24)
-offset_top = 528.0
-offset_right = 232.0
-offset_bottom = 552.0
+offset_top = 328.0
+offset_right = 472.0
+offset_bottom = 352.0
 script = ExtResource("2_4tdoi")
 statusLabel = NodePath("StatusLabel")
 
 [node name="StatusLabel" type="Label" parent="Margin/Content/StatusBar"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
